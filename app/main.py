@@ -52,9 +52,5 @@ def register():
     
     return str(1)
 
-
-if __name__ == "__main__":
-    # Only for debugging while developing
-    app.run(host='0.0.0.0', debug=True, port=80)
 #@app.route(web + "register", methods=["POST"])
 
