@@ -89,10 +89,12 @@ def get_sensors():
     if(not validatePasscode(request)):
         response["errors"] = ["bad_pass"]
         return jsonify(response), 200
-    sensors = SensorNode.query.all()
     
     sensorlist = []
-    for sensor in sensors:
+    for sensor in db.session.query(SensorNode).all():
+        sensor.__dict__.pop("_sa_instance_state")
+        print(str(sensor.__dict__))
+
         sensorlist.append(sensor.__dict__)
     response["sensors"] = sensorlist
     return jsonify(response), 200
