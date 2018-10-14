@@ -85,7 +85,8 @@ def check_passcode():
 def get_sensors():
     response = {}
     if(not validatePasscode(request)):
-        return response["errors"] = ["bad_pass"], 200
+        response["errors"] = ["bad_pass"]
+        return jsonify(response), 200
     sensors = SensorNode.query.all()
     response["sensors"] = sensors
     return jsonify(response), 200
