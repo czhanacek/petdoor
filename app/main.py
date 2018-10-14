@@ -64,7 +64,7 @@ def doEvaluations():
     sensors = Sensor.query.all()
     for sensor in sensors:
         sensor_id = sensor.id
-        reading = SensorReading.query.filter_by(sensor_id=sensor_id).order_by(SensorReading.val.desc()).first()
+        reading = SensorReading.query.filter_by(sensor_id=sensor_id).order_by(SensorReading.time.desc()).first()
         if(evaluteThreshold(reading.val, sensor.greater_than_or_eq, sensor.threshold)):
             print("alarm trip")
             alarm_tripped = True
@@ -176,9 +176,9 @@ def get_sensors():
         readingslist = []
         num_sensors = len(sensor.sensors)
         if(num_sensors > 0):
-            readings = sensor.sensors[0].readings.order_by(SensorReading.val.desc()).first()
-            if(readings == None):
-                theReading = readings[0].__dict__ # lists aren't mutable lol
+            readings = sensor.sensors[0].readings.order_by(SensorReading.time.desc()).first()
+            if(readings != None):
+                theReading = readings.__dict__ # lists aren't mutable lol
                 theReading.pop("_sa_instance_state")
                 readingslist = theReading
             sensorsdict = sensor.sensors[0].__dict__
