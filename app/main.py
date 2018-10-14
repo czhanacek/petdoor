@@ -33,7 +33,7 @@ db.create_all() # the order of this and the previous 2 lines is important
 
 @app.route(sensors + "register", methods=["POST"])
 def register():
-    mac_address = request.args.get('mac', None)
+    mac_address = request.form.get('mac', None)
     if(mac_address == None):
         return str(-1), 500 # return error
     
@@ -57,11 +57,12 @@ def register():
 @app.route(web + "check_passcode", methods=["POST"])
 def check_passcode():
     multi_dict = request.args
+    print("successfully modified")
     for key in multi_dict:
         print(multi_dict.get(key))
         print(multi_dict.getlist(key))
     response = {}
-    submitted_passcode = request.args.get("passcode", None)
+    submitted_passcode = request.form.get("passcode", None)
     if(submitted_passcode == None):
         errors = []
         status = "bad"
@@ -80,8 +81,8 @@ def check_passcode():
 @app.route(web + "update_passcode", methods=["POST"])
 def update_passcode():
     response = {}
-    current_passcode = request.args.get("current_passcode", None)
-    new_passcode = request.args.get("new_passcode", None)
+    current_passcode = request.form.get("current_passcode", None)
+    new_passcode = request.form.get("new_passcode", None)
     errors = []
     status = ""
     if(current_passcode == None or new_passcode == None):
