@@ -74,7 +74,7 @@ def check_passcode():
         response["errors"] = errors
         return jsonify(response), 500
     
-    if(submitted_passcode != aUser.passcode):
+    if(submitted_passcode != systemstats.passcode):
         result = "bad_pass"
     else:
         result = "good_pass"
