@@ -46,25 +46,28 @@ def validatePasscode(request):
 
 def mapStatusToState(status):
     if(status == "armed"):
-        return 1
+        return 201
     elif(status == "disarmed"):
-        return 2
+        return 202
     elif(status == "tripped"):
-        return 3
+        return 203
     
 def evaluteThreshold(val, gt_eq, threshold):
     if(gt_eq):
-        return val >= threshold
+        print("was greater than")
+        return float(val) >= float(threshold)
     else:
-        return val < threshold
+        return float(val) < float(threshold)
 
 def evaluteThresholds():
     # this does nothing rn
     alarm_tripped = False
     sensors = Sensor.query.all()
     for sensor in sensors:
-        reading = Sensor.get(sensor.id).readings.order_by(SensorReading.time).limit(1)
-        if(evaluteThreshold(reading.val, sensor.gt_eq, sensor.threshold)):
+        sensor_id = sensor.id
+        reading = SensorReading.query.filter_by(sensor_id=sensor_id).order_by(SensorReading.time).first()
+        if(evaluteThreshold(reading.val, sensor.greater_than_or_eq, sensor.threshold)):
+            print("alarm trip")
             alarm_tripped = True
 
     if(alarm_tripped and systemstats.system_status == "armed"):
@@ -93,7 +96,7 @@ def register():
         db.session.add(newNode)
         db.session.commit()
     
-    return str(1)
+    return "", 200
 
 @app.route(sensors + "report", methods=["POST"])
 def report():
@@ -113,13 +116,13 @@ def report():
         sensor_id = sensor_node.sensors[0].id
         newSensorReading = SensorReading(
             time=timestamp(),
-            value=sensor_val,
+            val=sensor_val,
             sensor_id=sensor_id
         )
         db.session.add(newSensorReading)
         db.session.commit()
         evaluteThresholds()
-        return str(mapStatusToState(systemstats.system_status)), 200
+        return "", mapStatusToState(systemstats.system_status)
         
         
 @app.route(web + "check_passcode", methods=["POST"])
@@ -164,20 +167,23 @@ def get_sensors():
         num_sensors = len(sensor.sensors)
         if(num_sensors > 0):
             readings = sensor.sensors[0].readings
-            for reading in readings:
-                reading.__dict__.pop("_sa_instance_state")
-                readingslist.append(reading.__dict__)
-            
+
+            theReading = readings[0].__dict__ # lists aren't mutable lol
+            theReading.pop("_sa_instance_state")
+            readingslist = theReading
             sensorsdict = sensor.sensors[0].__dict__
             
             sensorsdict.pop("_sa_instance_state")
-            sensorsdict.pop("readings")
+            try:
+                sensorsdict.pop("readings")
+            except:
+                pass
         sensor.__dict__.pop("_sa_instance_state")
         sensor.__dict__.pop("sensors")
         tempdict = sensor.__dict__
         if(num_sensors > 0):
             tempdict["sensors"] = sensorsdict
-            tempdict["sensors"]["readings"] = readingslist
+            tempdict["sensors"]["reading"] = readingslist
         sensorlist.append(tempdict)
     response["sensors"] = sensorlist
     return jsonify(response), 200

@@ -12,4 +12,4 @@ class Sensor(db.Model):
     threshold = db.Column(db.Float, nullable=False)
     greater_than_or_eq = db.Column(db.Boolean, nullable=False, default=True)
     sensor_node_id = db.Column(db.Integer, db.ForeignKey("sensor_node.id"))
-    readings = db.relationship("SensorReading", backref="sensor", lazy='joined')
+    readings = db.relationship("SensorReading", backref="sensor", lazy='dynamic')
