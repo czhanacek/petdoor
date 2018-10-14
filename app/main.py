@@ -59,8 +59,7 @@ def evaluteThreshold(val, gt_eq, threshold):
     else:
         return float(val) < float(threshold)
 
-def evaluteThresholds():
-    # this does nothing rn
+def doEvaluations():
     alarm_tripped = False
     sensors = Sensor.query.all()
     for sensor in sensors:
@@ -69,6 +68,12 @@ def evaluteThresholds():
         if(evaluteThreshold(reading.val, sensor.greater_than_or_eq, sensor.threshold)):
             print("alarm trip")
             alarm_tripped = True
+
+    return alarm_tripped
+
+def evaluteThresholds():
+    # this does nothing rn
+    alarm_tripped = doEvaluations()
 
     if(alarm_tripped and systemstats.system_status == "armed"):
         systemstats.system_status = "tripped"
@@ -247,9 +252,10 @@ def set_state():
 
     requested_state = request.form.get("state")
     if(requested_state in ["armed", "disarmed"]):
-        if(requested_state == "armed"):
-
-        systemstats.system_status = requested_state
+        if(requested_state == "armed" and doEvaluations() == True):
+            systemstats.system_status = "disarmed"
+        else:
+            systemstats.system_status = requested_state
     response["state"] = systemstats.system_status
     return jsonify(response)
 
