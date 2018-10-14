@@ -10,6 +10,8 @@ from models.sensor import Sensor, SensorType
 from models.sensor_reading import SensorReading
 from models.sensor_node import SensorNode
 
+from models.user import aUser
+
 
 sensors = "/sensors/"
 web = "/web/"
@@ -51,6 +53,29 @@ def register():
         db.session.commit()
     
     return str(1)
+
+@app.route(web + "check_passcode", methods=["POST"])
+def check_passcode():
+    response = []
+    submitted_passcode = request.args.get("passcode", None)
+    if(submitted_passcode == None):
+        errors = []
+        status = "bad"
+        response.append(status)
+        errors.append("no passcode submitted")
+        return jsonify(response.append(errors)), 500
+    
+    if(submitted_passcode != aUser.passcode):
+        status = "bad_pass"
+    else:
+        status = "good_pass"
+    return jsonify(response.append(status))
+
+        
+
+    
+
+
 
 #@app.route(web + "register", methods=["POST"])
 
