@@ -76,7 +76,7 @@ def evaluteThresholds():
 
 @app.route(sensors + "register", methods=["POST"])
 def register():
-    mac_address = str(request.data).split("=")[1]
+    mac_address = str(request.data).split("=")[1][:-1]
     
     if(mac_address == None):
         return str(0), 500 # return error
