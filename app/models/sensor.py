@@ -12,3 +12,4 @@ class Sensor(db.Model):
     threshold = db.Column(db.Float, nullable=False)
     node = db.Column(db.Integer, db.ForeignKey("sensor_node.id"))
     last_reading = db.Column(db.Integer, db.ForeignKey("sensor_reading.id"))
+    sensor_node = db.relationship("sensor_node")

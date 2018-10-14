@@ -93,13 +93,32 @@ def get_sensors():
     sensorlist = []
     for sensor in db.session.query(SensorNode).all():
         sensor.__dict__.pop("_sa_instance_state")
-        print(str(sensor.__dict__))
-
         sensorlist.append(sensor.__dict__)
     response["sensors"] = sensorlist
     return jsonify(response), 200
-    
 
+@app.route(web + "update_sensor", methods=["POST"])
+def update_sensor():
+    response = {}
+    if(not validatePasscode(request)):
+        response["errors"] = ["bad_pass"]
+        return jsonify(response), 200
+    query = SensorNode.query.filter_by(id=request.form.get("id")).limit(1)
+    if(query.count() == 0):
+        response["errors"] = ["invalid_id"]
+    else:
+        query.name = request.form.get("name")
+        query.location = request.form.get("location")
+        query.sensor.type = request.form.get("type")
+        query.sensor.threshold = request.form.get("threshold")
+        db.session.commit()
+        query = SensorNode.filter_by(id=request.form.get("id")).first()
+        sensor = db.session.query(SensorNode).filter_by(id=request.form.get("id").first())
+        sensor.__dict__.pop("_sa_instance_state")
+        response["sensor"] = sensor
+        
+    return jsonify(response)
+        
     
     
     
