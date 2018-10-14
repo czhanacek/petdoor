@@ -5,6 +5,7 @@ from flask import make_response
 from flask import jsonify
 import flask_sqlalchemy as sqlalchemy
 from flask_cors import CORS
+import uuid
 from models.shared import db
 from models.sensor import Sensor, SensorType
 from models.sensor_reading import SensorReading
@@ -49,6 +50,7 @@ def register():
     
     # Check to see if MAC address is already in database
     query = SensorNode.query.filter_by(mac=str(mac_address)).limit(1)
+
     if(query.count() == 1):
         # sensor node has already been registered 
         # (or we have a mac address collision!)
