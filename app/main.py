@@ -58,8 +58,8 @@ def register():
 def check_passcode():
     multi_dict = request.args
     for key in multi_dict:
-        print multi_dict.get(key)
-        print multi_dict.getlist(key)
+        print(multi_dict.get(key))
+        print(multi_dict.getlist(key))
     response = {}
     submitted_passcode = request.args.get("passcode", None)
     if(submitted_passcode == None):
