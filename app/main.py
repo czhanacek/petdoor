@@ -64,7 +64,7 @@ def doEvaluations():
     sensors = Sensor.query.all()
     for sensor in sensors:
         sensor_id = sensor.id
-        reading = SensorReading.query.filter_by(sensor_id=sensor_id).order_by(SensorReading.time).first()
+        reading = SensorReading.query.filter_by(sensor_id=sensor_id).order_by(desc(SensorReading.time)).first()
         if(evaluteThreshold(reading.val, sensor.greater_than_or_eq, sensor.threshold)):
             print("alarm trip")
             alarm_tripped = True
