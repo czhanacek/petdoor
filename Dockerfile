@@ -1,6 +1,6 @@
 FROM python:3.6
 EXPOSE 80
-RUN git clone https://gitlab.com/czhanacek/smart-home-security-system-backend /smartsec
+RUN git clone https://gitlab.com/teamasic/smart-home-security-system-backend /smartsec
 WORKDIR /smartsec
 RUN pip install pipenv
 RUN pipenv install
