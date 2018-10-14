@@ -72,7 +72,6 @@ def check_passcode():
         status = "good_pass"
     response["status"] = status
     return jsonify(response)
-
         
 
     
