@@ -84,7 +84,7 @@ def check_passcode():
 @app.route(web + "get_sensors", methods=["POST"])
 def get_sensors():
     response = {}
-    if(!validatePasscode(request)):
+    if(not validatePasscode(request)):
         return response["errors"] = ["bad_pass"], 200
     sensors = SensorNode.query.all()
     response["sensors"] = sensors
