@@ -10,7 +10,7 @@ from models.sensor import Sensor, SensorType
 from models.sensor_reading import SensorReading
 from models.sensor_node import SensorNode
 
-from models.user import aUser
+from models.systemstats import systemstats
 
 
 sensors = "/sensors/"
@@ -30,6 +30,14 @@ def create_app():
 app = create_app()
 app.app_context().push()
 db.create_all() # the order of this and the previous 2 lines is important
+
+def validatePasscode(request):
+    passcode = request.form.get("passcode", None)
+    if(passcode != systemstats.passcode):
+        return False
+    else:
+        return True
+
 
 @app.route(sensors + "register", methods=["POST"])
 def register():
@@ -73,28 +81,17 @@ def check_passcode():
     response["result"] = result
     return jsonify(response)
 
-@app.route(web + "update_passcode", methods=["POST"])
-def update_passcode():
+@app.route(web + "get_sensors", methods=["POST"])
+def get_sensors():
     response = {}
-    current_passcode = request.form.get("current_passcode", None)
-    new_passcode = request.form.get("new_passcode", None)
-    errors = []
-    result = ""
-    if(current_passcode == None or new_passcode == None):
-        status = "bad"
-        errors.append("one or more passwords not submitted")
+    if(!validatePasscode(request)):
+        return response["errors"] = ["bad_pass"], 200
+    sensors = SensorNode.query.all()
+    response["sensors"] = sensors
+    return jsonify(response), 200
     
-    if(submitted_passcode != aUser.passcode):
-        result = "bad_pass"
-    else:
-        result = "good_pass"
 
-
-    response["result"] = result
-    if(len(errors) == 0):
-        return jsonify(response)
-    else:
-        response["errors"] = errors
+    
     
     
 
