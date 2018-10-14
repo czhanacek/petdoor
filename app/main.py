@@ -249,6 +249,7 @@ def set_state():
     if(requested_state in ["armed", "disarmed"]):
         systemstats.system_status = requested_state
     response["state"] = systemstats.system_status
+    return jsonify(response)
 
 @app.route(web + "get_state", methods=["POST"])
 def get_state():
@@ -257,6 +258,6 @@ def get_state():
         response["errors"] = ["bad_pass"]
         return jsonify(response), 200
     response["state"] = systemstats.system_status
-
+    return jsonify(response)
 #@app.route(web + "register", methods=["POST"])
 
