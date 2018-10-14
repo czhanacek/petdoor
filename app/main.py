@@ -176,7 +176,7 @@ def get_sensors():
         readingslist = []
         num_sensors = len(sensor.sensors)
         if(num_sensors > 0):
-            readings = sensor.sensors[0].readings.order_by(model.Entry.amount.desc()).first()
+            readings = sensor.sensors[0].readings.order_by(SensorReading.val.desc()).first()
             if(readings.count() > 0):
                 theReading = readings[0].__dict__ # lists aren't mutable lol
                 theReading.pop("_sa_instance_state")
