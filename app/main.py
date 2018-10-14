@@ -6,6 +6,8 @@ from flask import jsonify
 import flask_sqlalchemy as sqlalchemy
 from flask_cors import CORS
 import uuid
+import calendar
+import time
 from models.shared import db
 from models.sensor import Sensor, SensorType
 from models.sensor_reading import SensorReading
@@ -32,6 +34,9 @@ app = create_app()
 app.app_context().push()
 db.create_all() # the order of this and the previous 2 lines is important
 
+def timestamp():
+    return calendar.timegm(time.gmtime()) * 1000
+
 def validatePasscode(request):
     passcode = request.form.get("passcode", None)
     if(passcode != systemstats.passcode):
@@ -39,12 +44,38 @@ def validatePasscode(request):
     else:
         return True
 
+def mapStatusToState(status):
+    if(status == "armed"):
+        return 1
+    elif(status == "disarmed"):
+        return 2
+    elif(status == "tripped"):
+        return 3
+    
+def evaluteThreshold(val, gt_eq, threshold):
+    if(gt_eq):
+        return val >= threshold
+    else:
+        return val < threshold
+
+def evaluteThresholds():
+    # this does nothing rn
+    alarm_tripped = False
+    sensors = Sensor.query.all()
+    for sensor in sensors:
+        reading = Sensor.get(sensor.id).readings.order_by(SensorReading.time).limit(1)
+        if(evaluteThreshold(reading.val, sensor.gt_eq, sensor.threshold)):
+            alarm_tripped = True
+
+    if(alarm_tripped and systemstats.system_status == "armed"):
+        systemstats.system_status = "tripped"
+    
 
 @app.route(sensors + "register", methods=["POST"])
 def register():
     mac_address = request.form.get('mac', None)
     if(mac_address == None):
-        return str(-1), 500 # return error
+        return str(0), 500 # return error
     
     # Now that we can be sure we got what we needed
     
@@ -64,6 +95,33 @@ def register():
     
     return str(1)
 
+@app.route(sensors + "report", methods=["POST"])
+def report():
+    mac_address = request.form.get('mac', None)
+    if(mac_address == None):
+        return str(0), 500 # return error
+    
+    sensor_val = request.form.get('val', None)
+    if(sensor_val == None):
+        return str(0), 500
+    else:
+        sensor_node = SensorNode.query.filter_by(mac=str(mac_address)).first()
+        if(sensor_node == None):
+            return str(0), 500
+        if(len(sensor_node.sensors) == 0):
+            return str(0), 500
+        sensor_id = sensor_node.sensors[0].id
+        newSensorReading = SensorReading(
+            time=timestamp(),
+            value=sensor_val,
+            sensor_id=sensor_id
+        )
+        db.session.add(newSensorReading)
+        db.session.commit()
+        evaluteThresholds()
+        return str(mapStatusToState(systemstats.system_status)), 200
+        
+        
 @app.route(web + "check_passcode", methods=["POST"])
 def check_passcode():
     response = {}
@@ -83,6 +141,15 @@ def check_passcode():
     response["result"] = result
     return jsonify(response)
 
+@app.route(web + "get_system_state", methods=["POST"])
+def get_system_state():
+    response = {}
+    if(not validatePasscode(request)):
+        response["errors"] = ["bad_pass"]
+        return jsonify(response), 200
+    response["result"] = systemstats.system_status
+    return jsonify(response), 200
+
 @app.route(web + "get_sensors", methods=["POST"])
 def get_sensors():
     response = {}
@@ -92,8 +159,26 @@ def get_sensors():
     
     sensorlist = []
     for sensor in db.session.query(SensorNode).all():
+        tempdict = {}
+        readingslist = []
+        num_sensors = len(sensor.sensors)
+        if(num_sensors > 0):
+            readings = sensor.sensors[0].readings
+            for reading in readings:
+                reading.__dict__.pop("_sa_instance_state")
+                readingslist.append(reading.__dict__)
+            
+            sensorsdict = sensor.sensors[0].__dict__
+            
+            sensorsdict.pop("_sa_instance_state")
+            sensorsdict.pop("readings")
         sensor.__dict__.pop("_sa_instance_state")
-        sensorlist.append(sensor.__dict__)
+        sensor.__dict__.pop("sensors")
+        tempdict = sensor.__dict__
+        if(num_sensors > 0):
+            tempdict["sensors"] = sensorsdict
+            tempdict["sensors"]["readings"] = readingslist
+        sensorlist.append(tempdict)
     response["sensors"] = sensorlist
     return jsonify(response), 200
 
@@ -124,7 +209,7 @@ def update_sensor():
             db.session.commit()
         query = SensorNode.query.filter_by(id=request.form.get("id")).first()
         sensor = db.session.query(SensorNode).filter_by(id=request.form.get("id")).first()
-        sensorsdict = sensor.sensors[0].__dict__
+        3
         sensor.__dict__.pop("_sa_instance_state")
         
         sensorsdict = sensor.sensors[0].__dict__
