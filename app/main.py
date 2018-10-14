@@ -73,7 +73,31 @@ def check_passcode():
     response["status"] = status
     return jsonify(response)
 
+@app.route(web + "update_passcode", methods=["POST"])
+def check_passcode():
+    print(str(request.args))
+    response = {}
+    current_passcode = request.args.get("current_passcode", None)
+    new_passcode = request.args.get("new_passcode", None)
+    errors = []
+    status = ""
+    if(current_passcode == None or new_passcode == None):
+        status = "bad"
+        errors.append("one or more passwords not submitted")
+    
+    if(submitted_passcode != aUser.passcode):
+        status = "bad_pass"
+    else:
+        status = "good_pass"
 
+
+    response["status"] = status
+    if(len(errors) == 0):
+        return jsonify(response)
+    else:
+        response["errors"] = errors
+    
+    
 
 #@app.route(web + "register", methods=["POST"])
 
