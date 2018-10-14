@@ -5,4 +5,4 @@ WORKDIR /smartsec
 RUN pip install pipenv
 RUN pipenv install
 ENV FLASK_APP=/smartsec/app/main.py
-CMD ["pipenv", "run", "flask", "run"]
+CMD ["pipenv", "run", "flask", "run", "--host=0.0.0.0", "--port=80"]

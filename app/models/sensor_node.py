@@ -1,4 +1,5 @@
 from models.shared import db
+import uuid
 
 class SensorNode(db.Model):
     __tablename__ = "sensor_node"
