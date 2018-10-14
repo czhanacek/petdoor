@@ -56,6 +56,7 @@ def register():
 
 @app.route(web + "check_passcode", methods=["POST"])
 def check_passcode():
+    print(str(request.args))
     response = {}
     submitted_passcode = request.args.get("passcode", None)
     if(submitted_passcode == None):
@@ -74,8 +75,7 @@ def check_passcode():
     return jsonify(response)
 
 @app.route(web + "update_passcode", methods=["POST"])
-def check_passcode():
-    print(str(request.args))
+def update_passcode():
     response = {}
     current_passcode = request.args.get("current_passcode", None)
     new_passcode = request.args.get("new_passcode", None)
