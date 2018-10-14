@@ -103,19 +103,41 @@ def update_sensor():
     if(not validatePasscode(request)):
         response["errors"] = ["bad_pass"]
         return jsonify(response), 200
-    query = SensorNode.query.filter_by(id=request.form.get("id")).limit(1)
-    if(query.count() == 0):
+    query = SensorNode.query.filter_by(id=request.form.get("id")).first()
+    if(query == None):
         response["errors"] = ["invalid_id"]
     else:
         query.name = request.form.get("name")
         query.location = request.form.get("location")
-        query.sensor.type = request.form.get("type")
-        query.sensor.threshold = request.form.get("threshold")
-        db.session.commit()
-        query = SensorNode.filter_by(id=request.form.get("id")).first()
-        sensor = db.session.query(SensorNode).filter_by(id=request.form.get("id").first())
+        if(query.sensors == []):
+            newSensor = Sensor(
+                type=request.form.get("type"),
+                threshold=request.form.get("threshold")
+            )
+            db.session.add(newSensor)
+            db.session.add(query)
+            query.sensors.append(newSensor)
+            db.session.commit()
+        else:
+            query.sensors[0].type = request.form.get("type")
+            query.sensors[0].threshold = request.form.get("threshold")
+            db.session.commit()
+        query = SensorNode.query.filter_by(id=request.form.get("id")).first()
+        sensor = db.session.query(SensorNode).filter_by(id=request.form.get("id")).first()
+        sensorsdict = sensor.sensors[0].__dict__
         sensor.__dict__.pop("_sa_instance_state")
-        response["sensor"] = sensor
+        
+        sensorsdict = sensor.sensors[0].__dict__
+        sensorsdict.pop("_sa_instance_state")
+        
+        sensor.__dict__.pop("sensors")
+        
+        print(str(sensor.__dict__))
+        
+        #sensor.sensor.__dict__.pop("_sa_instance_state")
+        response["sensor"] = sensor.__dict__
+        response["sensor"]["sensors"] = sensorsdict
+        #response["sensor"] = sensor.sensors[0].__dict__
         
     return jsonify(response)
         

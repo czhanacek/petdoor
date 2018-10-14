@@ -8,4 +8,5 @@ class SensorNode(db.Model):
     mac = db.Column(db.Integer, nullable=False)
     name = db.Column(db.String, nullable=True)
     location = db.Column(db.String, nullable=True)
+    sensors = db.relationship("Sensor", backref="sensor_node", lazy='joined')
     

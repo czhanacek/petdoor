@@ -6,4 +6,4 @@ class SensorReading(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.Float, nullable=False)
     value = db.Column(db.Float, nullable=False)
-    sensor = db.Column(db.Integer, db.ForeignKey("sensor.id"))
+    sensor_id = db.Column(db.Integer, db.ForeignKey("sensor.id"))

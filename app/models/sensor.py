@@ -8,8 +8,7 @@ class SensorType(enum.Enum):
 class Sensor(db.Model):
     __tablename__ = "sensor"
     id = db.Column(db.Integer, primary_key=True)
-    type = db.Column(db.Enum(SensorType))
+    type = db.Column(db.Integer)
     threshold = db.Column(db.Float, nullable=False)
-    node = db.Column(db.Integer, db.ForeignKey("sensor_node.id"))
-    last_reading = db.Column(db.Integer, db.ForeignKey("sensor_reading.id"))
-    sensor_node = db.relationship("sensor_node")
+    sensor_node_id = db.Column(db.Integer, db.ForeignKey("sensor_node.id"))
+    readings = db.relationship("SensorReading", backref="sensor", lazy='joined')
