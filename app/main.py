@@ -56,20 +56,22 @@ def register():
 
 @app.route(web + "check_passcode", methods=["POST"])
 def check_passcode():
-    response = []
+    response = {}
     submitted_passcode = request.args.get("passcode", None)
     if(submitted_passcode == None):
         errors = []
         status = "bad"
-        response.append(status)
+        response["status"] = status
         errors.append("no passcode submitted")
-        return jsonify(response.append(errors)), 500
+        response["errors"] = errors
+        return jsonify(response), 500
     
     if(submitted_passcode != aUser.passcode):
         status = "bad_pass"
     else:
         status = "good_pass"
-    return jsonify(response.append(status))
+    response["status"] = status
+    return jsonify(response)
 
         
 
