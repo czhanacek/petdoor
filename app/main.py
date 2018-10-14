@@ -171,10 +171,10 @@ def get_sensors():
         num_sensors = len(sensor.sensors)
         if(num_sensors > 0):
             readings = sensor.sensors[0].readings
-
-            theReading = readings[0].__dict__ # lists aren't mutable lol
-            theReading.pop("_sa_instance_state")
-            readingslist = theReading
+            if(len(readings) > 0):
+                theReading = readings[0].__dict__ # lists aren't mutable lol
+                theReading.pop("_sa_instance_state")
+                readingslist = theReading
             sensorsdict = sensor.sensors[0].__dict__
             
             sensorsdict.pop("_sa_instance_state")
