@@ -90,7 +90,11 @@ def get_sensors():
         response["errors"] = ["bad_pass"]
         return jsonify(response), 200
     sensors = SensorNode.query.all()
-    response["sensors"] = sensors
+    
+    sensorlist = []
+    for sensor in sensors:
+        sensorlist.append(sensor.__dict__)
+    response["sensors"] = sensorlist
     return jsonify(response), 200
     
 
