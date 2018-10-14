@@ -76,7 +76,7 @@ def evaluteThresholds():
 
 @app.route(sensors + "register", methods=["POST"])
 def register():
-    mac_address = request.form.get('mac', None)
+    mac_address = request.params.get('mac', None)
     if(mac_address == None):
         return str(0), 500 # return error
     
@@ -100,11 +100,11 @@ def register():
 
 @app.route(sensors + "report", methods=["POST"])
 def report():
-    mac_address = request.form.get('mac', None)
+    mac_address = request.params.get('mac', None)
     if(mac_address == None):
         return str(0), 500 # return error
     
-    sensor_val = request.form.get('val', None)
+    sensor_val = request.params.get('val', None)
     if(sensor_val == None):
         return str(0), 500
     else:
@@ -234,7 +234,25 @@ def update_sensor():
         
     
     
-    
+@app.route(web + "set_state", methods=["POST"])
+def set_state():
+    response = {}
+    if(not validatePasscode(request)):
+        response["errors"] = ["bad_pass"]
+        return jsonify(response), 200
+
+    requested_state = request.form.get("state")
+    if(requested_state in ["armed", "disarmed"]):
+        systemstats.system_status = requested_state
+    response["state"] = systemstats.system_status
+
+@app.route(web + "get_state", methods=["POST"])
+def get_state():
+    response = {}
+    if(not validatePasscode(request)):
+        response["errors"] = ["bad_pass"]
+        return jsonify(response), 200
+    response["state"] = systemstats.system_status
 
 #@app.route(web + "register", methods=["POST"])
 
