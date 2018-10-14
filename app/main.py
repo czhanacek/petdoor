@@ -114,9 +114,9 @@ def report():
     else:
         sensor_node = SensorNode.query.filter_by(mac=str(mac_address)).first()
         if(sensor_node == None):
-            return str(0), 500
+            return str(0), 204
         if(len(sensor_node.sensors) == 0):
-            return str(0), 500
+            return str(0), 204
         sensor_id = sensor_node.sensors[0].id
         newSensorReading = SensorReading(
             time=timestamp(),
@@ -220,7 +220,6 @@ def update_sensor():
             db.session.commit()
         query = SensorNode.query.filter_by(id=request.form.get("id")).first()
         sensor = db.session.query(SensorNode).filter_by(id=request.form.get("id")).first()
-        3
         sensor.__dict__.pop("_sa_instance_state")
         
         sensorsdict = sensor.sensors[0].__dict__
@@ -248,6 +247,8 @@ def set_state():
 
     requested_state = request.form.get("state")
     if(requested_state in ["armed", "disarmed"]):
+        if(requested_state == "armed"):
+
         systemstats.system_status = requested_state
     response["state"] = systemstats.system_status
     return jsonify(response)
