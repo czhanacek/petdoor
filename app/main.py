@@ -125,6 +125,7 @@ def report():
         )
         db.session.add(newSensorReading)
         db.session.commit()
+        print("commited new sensor reading")
         evaluteThresholds()
         return "", mapStatusToState(systemstats.system_status)
         
