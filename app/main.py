@@ -56,26 +56,21 @@ def register():
 
 @app.route(web + "check_passcode", methods=["POST"])
 def check_passcode():
-    multi_dict = request.args
-    print("successfully modified")
-    for key in multi_dict:
-        print(multi_dict.get(key))
-        print(multi_dict.getlist(key))
     response = {}
     submitted_passcode = request.form.get("passcode", None)
     if(submitted_passcode == None):
         errors = []
-        status = "bad"
-        response["status"] = status
+        result = "bad"
+        response["result"] = result
         errors.append("no passcode submitted")
         response["errors"] = errors
         return jsonify(response), 500
     
     if(submitted_passcode != aUser.passcode):
-        status = "bad_pass"
+        result = "bad_pass"
     else:
-        status = "good_pass"
-    response["status"] = status
+        result = "good_pass"
+    response["result"] = result
     return jsonify(response)
 
 @app.route(web + "update_passcode", methods=["POST"])
@@ -84,18 +79,18 @@ def update_passcode():
     current_passcode = request.form.get("current_passcode", None)
     new_passcode = request.form.get("new_passcode", None)
     errors = []
-    status = ""
+    result = ""
     if(current_passcode == None or new_passcode == None):
         status = "bad"
         errors.append("one or more passwords not submitted")
     
     if(submitted_passcode != aUser.passcode):
-        status = "bad_pass"
+        result = "bad_pass"
     else:
-        status = "good_pass"
+        result = "good_pass"
 
 
-    response["status"] = status
+    response["result"] = result
     if(len(errors) == 0):
         return jsonify(response)
     else:
