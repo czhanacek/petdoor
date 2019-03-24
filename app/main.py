@@ -8,15 +8,18 @@ from flask_cors import CORS
 import uuid
 import calendar
 import time
+
+# Import the database models
 from models.shared import db
+
 from models.sensor import Sensor, SensorType
 from models.sensor_reading import SensorReading
 from models.sensor_node import SensorNode
 
 from models.systemstats import systemstats
 
-
-sensors = "/sensors/"
+# the base urls for each set of applications
+collar = "/collar/"
 web = "/web/"
 
 
@@ -24,10 +27,8 @@ web = "/web/"
 def create_app():
     app = Flask(__name__)
     CORS(app)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///security_system.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///petdoor.db'
     db.init_app(app)
-    print("created app!")
-    
     return app
 
 app = create_app()
@@ -106,11 +107,13 @@ def register():
 
 @app.route(sensors + "report", methods=["POST"])
 def report():
+
+    # parse the mac address and sensor values from the sensor. Flask couldn't for some reason.
     [mac_address, val] = str(request.data).split("&")
     mac_address = mac_address.split("=")[1]
-    print(val)
     sensor_val = float(val.split("=")[1][:-1])
-    print(sensor_val)
+
+
     if(mac_address == None):
         return str(0), 500 # return error
     
@@ -134,7 +137,7 @@ def report():
         evaluteThresholds()
         return "", mapStatusToState(systemstats.system_status)
         
-        
+
 @app.route(web + "check_passcode", methods=["POST"])
 def check_passcode():
     response = {}
@@ -179,7 +182,7 @@ def get_sensors():
             readings = sensor.sensors[0].readings.order_by(SensorReading.time.desc()).first()
             if(readings != None):
                 theReading = readings.__dict__ # lists aren't mutable lol
-                theReading.pop("_sa_instance_state")
+                theReading.pop("_sa_instance_state") # these all have to be removed for jsonify to work
                 readingslist = theReading
             sensorsdict = sensor.sensors[0].__dict__
             
@@ -220,7 +223,7 @@ def update_sensor():
             query.sensors.append(newSensor)
             db.session.commit()
         else:
-            query.sensors[0].type = request.form.get("type")
+            query.sensors[0].type = request.form.get("type") # currently hardcoded to work with only one sensor per sensornode
             query.sensors[0].threshold = request.form.get("threshold")
             db.session.commit()
         query = SensorNode.query.filter_by(id=request.form.get("id")).first()
@@ -242,7 +245,7 @@ def update_sensor():
     return jsonify(response)
         
     
-    
+
 @app.route(web + "set_state", methods=["POST"])
 def set_state():
     response = {}
@@ -267,5 +270,5 @@ def get_state():
         return jsonify(response), 200
     response["state"] = systemstats.system_status
     return jsonify(response)
-#@app.route(web + "register", methods=["POST"])
+
 
